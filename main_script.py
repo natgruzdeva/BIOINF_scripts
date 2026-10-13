@@ -1,3 +1,8 @@
+from helpers.bio_files import (
+    derive_single_line_path,
+    write_single_line_copy,
+)
+
 from helpers.fastq import (
     is_read_ok,
     make_bounds,
@@ -43,3 +48,23 @@ def filter_fastq(
                           len_low, len_high, quality_threshold):
                 write_fastq_record(output_file, record)
             record = read_next_fastq_record(input_file)
+
+def convert_multiline_fasta_to_oneline(input_fasta: str, output_fasta=None) -> None:
+    """
+    Переводит многострочный fasta-формат,в однострочный и сохраняет результат в новый файл.
+
+    В памяти одновременно живёт только одна запись. 
+
+    Аргументы:
+        input_fasta: путь до входного многострочного fasta файла.
+        output_fasta: путь до выхода; по умолчанию None.
+
+    Возвращает:
+        None.
+    """
+    if output_fasta is None:
+        output_fasta = derive_single_line_path(input_fasta)
+
+    with open(input_fasta, "r", encoding="utf-8") as input_file, \
+            open(output_fasta, "w", encoding="utf-8") as output_file:
+        write_single_line_copy(input_file, output_file)
