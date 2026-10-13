@@ -1,6 +1,8 @@
 from helpers.bio_files import (
     derive_single_line_path,
     write_single_line_copy,
+    collect_best_descriptions,
+    save_lines,
 )
 
 from helpers.fastq import (
@@ -65,6 +67,24 @@ def convert_multiline_fasta_to_oneline(input_fasta: str, output_fasta=None) -> N
     if output_fasta is None:
         output_fasta = derive_single_line_path(input_fasta)
 
-    with open(input_fasta, "r", encoding="utf-8") as input_file, \
-            open(output_fasta, "w", encoding="utf-8") as output_file:
+    with open(input_fasta, "r", encoding="utf-8") as input_file, open(output_fasta, "w", encoding="utf-8") as output_file:
         write_single_line_copy(input_file, output_file)
+
+def parse_blast_output(input_file: str, output_file: str) -> None:
+    """
+    Извлекает описание лучшего совпадения для каждого запроса BLAST,
+    удаляет дубликаты и записывает результат одним столбцом в алфавитном
+    порядке (без учёта регистра).
+    
+    Аргументы:
+        input_file: путь до txt-файла с результатами BLAST.
+        output_file: путь до выходного файла.
+
+    Возвращает:
+        None.
+    """
+    with open(input_file, "r", encoding="utf-8") as blast_file:
+        descriptions = collect_best_descriptions(blast_file)
+
+    with open(output_file, "w", encoding="utf-8") as result_file:
+        save_lines(result_file, sorted(set(descriptions), key=str.lower))
